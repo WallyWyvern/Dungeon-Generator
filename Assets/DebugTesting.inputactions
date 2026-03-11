@@ -1,0 +1,67 @@
+{
+    "version": 1,
+    "name": "DebugTesting",
+    "maps": [
+        {
+            "name": "Debug",
+            "id": "07f2aaf9-2da7-4807-a1be-6eeef1d57218",
+            "actions": [
+                {
+                    "name": "GenerateNewDungeon",
+                    "type": "Button",
+                    "id": "804f6dab-8797-4b14-bff0-20eaf9416077",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "GenerateDungeonExtension",
+                    "type": "Button",
+                    "id": "c550014b-29c6-42c9-83b5-b1b95e5d7c17",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "179a0a8c-87eb-4fb0-9e25-2dcb56fa5f3a",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "GenerateNewDungeon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "eb2d11b4-37b9-45e6-917a-8ec0cc40e7e9",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "GenerateDungeonExtension",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Keyboard",
+            "bindingGroup": "Keyboard",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}
