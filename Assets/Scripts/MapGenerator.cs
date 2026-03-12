@@ -24,6 +24,8 @@ public class MapGenerator : MonoBehaviour
     private int secretRoomIndex;
     private int shopRoomIndex;
     private int itemRoomIndex;
+    private int positionOffsetX;
+    private int positionOffsetY;
 
     private Queue<int> cellQueue;
     private List<Cell> spawnedCells = new();
@@ -38,15 +40,20 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private InputActionReference generateDungeon;
     [SerializeField] private InputActionReference extendDungeon;
 
-
     private void OnEnable()
     {
         generateDungeon.action.started += generateNewDungeon;
+        extendDungeon.action.started += startDungeonExtension;
     }
 
     private void OnDisable()
     {
         generateDungeon.action.started -= generateNewDungeon;
+        extendDungeon.action.started -= startDungeonExtension;
+    }
+    private void startDungeonExtension(InputAction.CallbackContext context)
+    {
+        SetupDungeonExtension();
     }
 
     private void generateNewDungeon(InputAction.CallbackContext context)
@@ -233,12 +240,34 @@ public class MapGenerator : MonoBehaviour
     {
         int x = index % 10;
         int y = index / 10;
-        Vector2 position = new Vector2(x * cellSize, -y * cellSize);
+        Vector2 position = new Vector2((x * cellSize) + positionOffsetX, (-y * cellSize) + positionOffsetY);
 
         Cell newCell = Instantiate(cellPrefab, position, Quaternion.identity);
         newCell.value = 1;
         newCell.index = index;
 
         spawnedCells.Add(newCell);
+    }
+
+    void SetupDungeonExtension()
+    {
+        // get bossroom position
+        Vector2 bossRoomPosition = GetBossRoomPosition(bossRoomIndex);
+        Debug.Log(bossRoomPosition.ToString());
+        // check boss room neighbour
+        // determine opposite direction
+        // calculate offsets
+    }
+
+    Vector2 GetBossRoomPosition(int index)
+    { 
+        foreach(var cell in spawnedCells)
+        {
+            if (cell.index == index)
+            {
+                return cell.transform.position;
+            }
+        }
+        return Vector2.zero;
     }
 }
