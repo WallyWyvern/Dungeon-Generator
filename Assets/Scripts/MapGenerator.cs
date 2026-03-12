@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -110,17 +111,99 @@ public class MapGenerator : MonoBehaviour
         SetupSpecialRooms();
     }
 
-    void SetupSpecialRooms() { }
+    void SetupSpecialRooms() 
+    {
+        bossRoomIndex = endRooms.Count > 0 ? endRooms[endRooms.Count - 1] : -1;
 
-    void UpdateSpecialRoomVisuals() { }
+        if (bossRoomIndex != -1)
+        { 
+            endRooms.RemoveAt(endRooms.Count - 1);
+        }
+
+        itemRoomIndex = RandomEndRoom();
+        shopRoomIndex = RandomEndRoom();
+        secretRoomIndex = PickSecretRoom();
+
+        if (itemRoomIndex == -1 || shopRoomIndex == -1 || bossRoomIndex == -1 || secretRoomIndex == -1)
+        {
+            SetupDungeon();
+            return;
+        }
+
+        SpawnRoom(secretRoomIndex);
+
+        UpdateSpecialRoomVisuals();
+    }
+
+    void UpdateSpecialRoomVisuals() 
+    {
+        foreach (var cell in spawnedCells)
+        { 
+            if(cell.index == itemRoomIndex)
+            {
+                cell.SetSpecialRoomSprite(item);
+            }
+
+            if (cell.index == shopRoomIndex)
+            {
+                cell.SetSpecialRoomSprite(shop);
+            }
+
+            if (cell.index == bossRoomIndex)
+            {
+                cell.SetSpecialRoomSprite(boss);
+            }
+
+            if (cell.index == secretRoomIndex)
+            {
+                cell.SetSpecialRoomSprite(secret);
+            }
+        }
+    }
 
     int RandomEndRoom() 
     {
-        return -1;
+        if (endRooms.Count == 0) return -1;
+
+        int randomRoom = Random.Range(0, endRooms.Count);
+        int index = endRooms[randomRoom];
+
+        endRooms.RemoveAt(randomRoom);
+        return index;
     }
 
     int PickSecretRoom() 
     {
+        for (int attempt = 0; attempt < 900; attempt++)
+        { 
+            int x = Mathf.FloorToInt(Random.Range(0f, 1f) * 9) + 1;
+            int y = Mathf.FloorToInt(Random.Range(0f, 1f) * 8) + 2;
+
+            int index = y * 10 + x;
+
+            if (floorPlan[index] != 0)
+            {
+                continue;
+            }
+
+            if (bossRoomIndex == index - 1 || bossRoomIndex == index + 1 || bossRoomIndex == index - 10 || bossRoomIndex == index + 10)
+            {
+                continue;
+            }
+
+            if (index - 1 < 0 || index + 1 > floorPlan.Length || index - 10 < 0 || index + 10 > floorPlan.Length)
+            {
+                continue;
+            }
+
+            int neighbours = GetNeighbourCount(index);
+
+            if (neighbours >= 3 || (attempt > 300 && neighbours >= 2) || (attempt > 600 && neighbours >= 1))
+            {
+                return index;
+            }
+        }
+
         return -1;
     }
 
