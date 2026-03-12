@@ -24,8 +24,8 @@ public class MapGenerator : MonoBehaviour
     private int secretRoomIndex;
     private int shopRoomIndex;
     private int itemRoomIndex;
-    private int positionOffsetX;
-    private int positionOffsetY;
+    private float positionOffsetX;
+    private float positionOffsetY;
 
     private Queue<int> cellQueue;
     private List<Cell> spawnedCells = new();
@@ -251,12 +251,43 @@ public class MapGenerator : MonoBehaviour
 
     void SetupDungeonExtension()
     {
+        floorPlan = new int[100];
+        floorPlanCount = default;
+        cellQueue = new Queue<int>();
+        endRooms = new List<int>();
+
         // get bossroom position
         Vector2 bossRoomPosition = GetBossRoomPosition(bossRoomIndex);
         Debug.Log(bossRoomPosition.ToString());
-        // check boss room neighbour
-        // determine opposite direction
-        // calculate offsets
+        // check boss room neighbour and calculate offsets
+        if (floorPlan[bossRoomIndex + 1] == 1)
+        {
+            positionOffsetX += (9 - ((bossRoomIndex + 10) % 10)) * cellSize;
+            positionOffsetY += (5 - ((bossRoomIndex + 10) / 10)) * cellSize;
+            startLocation = 59;
+        }
+        if (floorPlan[bossRoomIndex - 1] == 1)
+        {
+            positionOffsetX += (((bossRoomIndex + 10) % 10)) * cellSize;
+            positionOffsetY += (((bossRoomIndex + 10) / 10) - 5) * cellSize;
+            startLocation = 50;
+        }
+        if (floorPlan[bossRoomIndex + 10] == 1)
+        {
+            positionOffsetX += (((bossRoomIndex - 10) % 10) - 5) * cellSize;
+            positionOffsetY += (((bossRoomIndex - 10) / 10) - 9) * cellSize;
+            startLocation = 95;
+        }
+        if (floorPlan[bossRoomIndex - 10] == 1)
+        {
+            positionOffsetX += (5 - ((bossRoomIndex + 10) % 10)) * cellSize;
+            positionOffsetY += (((bossRoomIndex + 10) / 10)) * cellSize;
+            startLocation = 5;
+        }
+
+        VisitCell(startLocation);
+
+        GenerateDungeon();
     }
 
     Vector2 GetBossRoomPosition(int index)
