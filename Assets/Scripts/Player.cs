@@ -33,7 +33,7 @@ public class Player : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         moveDirection = moveAction.action.ReadValue<Vector2>();
         player.Move(moveDirection.normalized * playerSpeed);

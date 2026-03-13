@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,12 +45,31 @@ public class RoomManager : MonoBehaviour
             var convertedPosition = new Vector2(currentPosition.x * xOffset, currentPosition.y * yOffset);
             var spawnedRoom = Instantiate(roomPrefab, convertedPosition, Quaternion.identity);
 
+            spawnedRoom.SetupRoom(currentCell, foundRoom);
+
             createdRooms.Add(spawnedRoom);
         }
     }
 
     private bool DoesTileMatchCell(int[] occupiedTiles, Cell cell)
     {
-        return false;
+        if(occupiedTiles.Length != cell.cellList.Count) return false;
+
+        int minIndex = cell.cellList.Min();
+        List<int> normalizedCell = new List<int>();
+
+        foreach (int index in cell.cellList)
+        {
+            int dx = (index % 10) - (minIndex % 10);
+            int dy = (index / 10) - (minIndex / 10);
+
+            normalizedCell.Add(dy * 10 + dx);
+        }
+
+        normalizedCell.Sort();
+        int[] sortedOccupied = (int[])occupiedTiles.Clone();
+        Array.Sort(sortedOccupied);
+
+        return normalizedCell.SequenceEqual(sortedOccupied);
     }
 }
