@@ -40,7 +40,7 @@ public class Room : MonoBehaviour
 
     private void TryPlaceDoor(int fromIndex, Vector2 positionOffset, EdgeDirection direction, int[] floorPlan, List<Cell> cellList, Cell currentCell)
     {
-        int neighbourIndex = fromIndex;
+        int neighbourIndex = fromIndex + GetOffset(direction);
 
         if (neighbourIndex < 0 || neighbourIndex >= floorPlan.Length) { return; }
         if (floorPlan[neighbourIndex] != 1 ) { return; }
@@ -58,20 +58,24 @@ public class Room : MonoBehaviour
     private void SetupDoor(Door door, EdgeDirection direction, RoomType roomType)
     {
         var doorType = GetDoorOptions(roomType);
+        door.SetDoorSprite(doorType.upDoor);
 
         switch (direction)
         {
             case EdgeDirection.Up:
-                door.SetDoorSprite(doorType.upDoor);
+                door.direction = EdgeDirection.Up;
                 break;
             case EdgeDirection.Down:
-                door.SetDoorSprite(doorType.downDoor);
+                door.direction = EdgeDirection.Down;
+                door.GetComponent<BoxCollider>().transform.Rotate(0, 0, 180);
                 break;
             case EdgeDirection.Left:
-                door.SetDoorSprite(doorType.leftDoor);
+                door.direction = EdgeDirection.Left;
+                door.GetComponent<BoxCollider>().transform.Rotate(0, 0, 90);
                 break;
             case EdgeDirection.Right:
-                door.SetDoorSprite(doorType.rightDoor);
+                door.direction = EdgeDirection.Right;
+                door.GetComponent<BoxCollider>().transform.Rotate(0, 0, -90);
                 break;
             default:
                 break;
@@ -93,9 +97,9 @@ public class Room : MonoBehaviour
             case EdgeDirection.Down:
                 return 10;
             case EdgeDirection.Left:
-                return 1;
-            case EdgeDirection.Right:
                 return -1;
+            case EdgeDirection.Right:
+                return 1;
         }
         
         return 0;

@@ -43,6 +43,18 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private InputActionReference generateDungeon;
     [SerializeField] private InputActionReference extendDungeon;
 
+
+    // infinite grid with dictionary (x,y naar int)? 
+
+    /* references for dictionary refactor
+        +1 is x + 1
+        -1 is x - 1
+        +10 is y - 1
+        -10 is y + 1
+     
+        index is a Vector2Int (dictionary key)
+        
+     */
     public static MapGenerator instance;
 
     private void OnEnable()
