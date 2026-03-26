@@ -106,7 +106,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Door
   spriteRenderer: {fileID: 6715145378728809964}
+  direction: 0
   doorTrigger: {fileID: 626902093116452597}
+  teleportUp: {x: 0, y: 4}
+  teleportDown: {x: 0, y: -4}
+  teleportLeft: {x: -5, y: 0}
+  teleportRight: {x: 5, y: 0}
 --- !u!65 &626902093116452597
 BoxCollider:
   m_ObjectHideFlags: 0

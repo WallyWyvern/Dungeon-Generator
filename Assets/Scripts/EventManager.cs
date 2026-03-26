@@ -10,9 +10,9 @@ public class EventManager : MonoBehaviour
         Instance = this;
     }
 
-    public event Action<Vector2> onTeleportPlayer;
-    public void TeleportPlayer(Vector2 pos)
+    public event Action<EdgeDirection> onTeleportPlayer;
+    public void TeleportPlayer(EdgeDirection dir)
     {
-        if (onTeleportPlayer != null) { onTeleportPlayer(pos); }
+        if (onTeleportPlayer != null) { onTeleportPlayer(dir); }
     }
 }
