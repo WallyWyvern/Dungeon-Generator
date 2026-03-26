@@ -1,11 +1,20 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class MainCam : MonoBehaviour
 {
+    [SerializeField] private InputActionReference newDungeon;
+    [SerializeField] private Vector3 startPosition;
     private void Start()
     {
         EventManager.Instance.onTeleportPlayer += TeleportCam;
+        newDungeon.action.started += ResetCam;
+    }
+
+    private void ResetCam(InputAction.CallbackContext context)
+    {
+        transform.position = startPosition;
     }
 
     private void TeleportCam(EdgeDirection direction)

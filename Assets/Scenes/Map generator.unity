@@ -269,6 +269,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 634ad6c703e6505459fdbe6a92528140, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainCam
+  newDungeon: {fileID: -3890633050665502990, guid: 92b57300e3b11ea449387803d4fb74b0, type: 3}
+  startPosition: {x: 53.125, y: -21.25, z: -5}
 --- !u!1 &604522831
 GameObject:
   m_ObjectHideFlags: 0
@@ -521,6 +523,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1089144049305438076, guid: 3275b5e5a21a30d429ede37e697039ca, type: 3}
+      propertyPath: newDungeon
+      value: 
+      objectReference: {fileID: -3890633050665502990, guid: 92b57300e3b11ea449387803d4fb74b0, type: 3}
+    - target: {fileID: 1089144049305438076, guid: 3275b5e5a21a30d429ede37e697039ca, type: 3}
       propertyPath: playerSpeed
       value: 0.1
       objectReference: {fileID: 0}
@@ -535,6 +541,14 @@ PrefabInstance:
     - target: {fileID: 1089144049305438076, guid: 3275b5e5a21a30d429ede37e697039ca, type: 3}
       propertyPath: teleportLeft.x
       value: -3.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1089144049305438076, guid: 3275b5e5a21a30d429ede37e697039ca, type: 3}
+      propertyPath: startPosition.x
+      value: 53.125
+      objectReference: {fileID: 0}
+    - target: {fileID: 1089144049305438076, guid: 3275b5e5a21a30d429ede37e697039ca, type: 3}
+      propertyPath: startPosition.y
+      value: -21.25
       objectReference: {fileID: 0}
     - target: {fileID: 1089144049305438076, guid: 3275b5e5a21a30d429ede37e697039ca, type: 3}
       propertyPath: teleportRight.x

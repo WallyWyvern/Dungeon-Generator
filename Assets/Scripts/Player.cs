@@ -8,9 +8,11 @@ public class Player : MonoBehaviour
     [SerializeField] private Vector2 teleportDown;
     [SerializeField] private Vector2 teleportLeft;
     [SerializeField] private Vector2 teleportRight;
+    [SerializeField] private Vector3 startPosition;
 
     [SerializeField] private InputActionReference moveAction;
     [SerializeField] private InputActionReference bombAction;
+    [SerializeField] private InputActionReference newDungeon;
     [SerializeField] private CharacterController player;
     [SerializeField] private float playerSpeed = 0.05f;
     private Vector2 moveDirection;
@@ -18,8 +20,15 @@ public class Player : MonoBehaviour
     private void Start()
     {
         bombAction.action.started += dropBomb;
+        newDungeon.action.started += ResetPlayer;
         moveAction.action.Enable();
         EventManager.Instance.onTeleportPlayer += TeleportPlayer;
+    }
+
+    private void ResetPlayer(InputAction.CallbackContext context)
+    {
+        transform.position = startPosition;
+        Physics.SyncTransforms();
     }
 
     private void TeleportPlayer(EdgeDirection direction)
