@@ -55,13 +55,13 @@ public class RoomManager : MonoBehaviour
     {
         if(occupiedTiles.Length != cell.cellList.Count) return false;
 
-        int minIndex = cell.cellList.Min();
+        Vector2Int minKey = cell.cellList.Min();
         List<int> normalizedCell = new List<int>();
 
-        foreach (int index in cell.cellList)
+        foreach (Vector2Int key in cell.cellList)
         {
-            int dx = (index % 10) - (minIndex % 10);
-            int dy = (index / 10) - (minIndex / 10);
+            int dx = (key.x) - (minKey.x);
+            int dy = (key.y) - (minKey.y);
 
             normalizedCell.Add(dy * 10 + dx);
         }

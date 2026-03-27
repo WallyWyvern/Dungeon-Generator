@@ -28,7 +28,7 @@ public class Room : MonoBehaviour
         SetupOneByOne(currentCell, floorPlan, cellList);
     }
 
-    public void SetupOneByOne(Cell cell, int[] floorPlan, List<Cell> cellList)
+    public void SetupOneByOne(Cell cell, Dictionary<Vector2Int, Cell> floorPlan, List<Cell> cellList)
     {
         var currentCell = cell.cellList[0];
 
@@ -38,14 +38,13 @@ public class Room : MonoBehaviour
         TryPlaceDoor(currentCell, new Vector2(4.25f, 0), EdgeDirection.Right, floorPlan, cellList, cell);
     }
 
-    private void TryPlaceDoor(int fromIndex, Vector2 positionOffset, EdgeDirection direction, int[] floorPlan, List<Cell> cellList, Cell currentCell)
+    private void TryPlaceDoor(Vector2Int fromKey, Vector2 positionOffset, EdgeDirection direction, Dictionary<Vector2Int, Cell> floorPlan, List<Cell> cellList, Cell currentCell)
     {
-        int neighbourIndex = fromIndex + GetOffset(direction);
+        Vector2Int neighbourKey = fromKey + GetOffset(direction);
 
-        if (neighbourIndex < 0 || neighbourIndex >= floorPlan.Length) { return; }
-        if (floorPlan[neighbourIndex] != 1 ) { return; }
+        if (floorPlan.ContainsKey(neighbourKey) ) { return; }
         
-        var foundCell = cellList.FirstOrDefault(x => x.cellList.Contains(neighbourIndex));
+        var foundCell = cellList.FirstOrDefault(x => x.cellList.Contains(neighbourKey));
 
         if (foundCell.roomType == RoomType.Secret ) { return; }
 
@@ -88,20 +87,20 @@ public class Room : MonoBehaviour
         return RoomManager.instance.doors.FirstOrDefault(x=>x.roomType == roomType); 
     }
 
-    private int GetOffset(EdgeDirection direction)
+    private Vector2Int GetOffset(EdgeDirection direction)
     {
         switch (direction)
         {
             case EdgeDirection.Up:
-                return -10;
+                return new Vector2Int(0, 1);
             case EdgeDirection.Down:
-                return 10;
+                return new Vector2Int(0, -1);
             case EdgeDirection.Left:
-                return -1;
+                return new Vector2Int(-1, 0);
             case EdgeDirection.Right:
-                return 1;
+                return new Vector2Int(1, 0);
         }
         
-        return 0;
+        return new Vector2Int(0, 0);
     }
 }
