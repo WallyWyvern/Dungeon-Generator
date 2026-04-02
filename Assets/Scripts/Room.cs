@@ -30,7 +30,7 @@ public class Room : MonoBehaviour
 
     public void SetupOneByOne(Cell cell, Dictionary<Vector2Int, Cell> floorPlan, List<Cell> cellList)
     {
-        var currentCell = cell.cellList[0];
+        Vector2Int currentCell = cell.key;
 
         TryPlaceDoor(currentCell, new Vector2(0, 1.75f), EdgeDirection.Up, floorPlan, cellList, cell);
         TryPlaceDoor(currentCell, new Vector2(0, -1.75f), EdgeDirection.Down, floorPlan, cellList, cell);
@@ -42,9 +42,9 @@ public class Room : MonoBehaviour
     {
         Vector2Int neighbourKey = fromKey + GetOffset(direction);
 
-        if (floorPlan.ContainsKey(neighbourKey) ) { return; }
-        
-        var foundCell = cellList.FirstOrDefault(x => x.cellList.Contains(neighbourKey));
+        if (!floorPlan.ContainsKey(neighbourKey) ) { return; }
+
+        var foundCell = floorPlan[neighbourKey];
 
         if (foundCell.roomType == RoomType.Secret ) { return; }
 
@@ -92,9 +92,9 @@ public class Room : MonoBehaviour
         switch (direction)
         {
             case EdgeDirection.Up:
-                return new Vector2Int(0, 1);
-            case EdgeDirection.Down:
                 return new Vector2Int(0, -1);
+            case EdgeDirection.Down:
+                return new Vector2Int(0, 1);
             case EdgeDirection.Left:
                 return new Vector2Int(-1, 0);
             case EdgeDirection.Right:

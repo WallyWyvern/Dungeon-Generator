@@ -19,7 +19,7 @@ public class Cell : MonoBehaviour
     public Vector2Int key;
     public int value;
     public List<int> cellListLegacy = new List<int>();
-    public List<Vector2Int> cellList = new List<Vector2Int>();
+    public List<Vector2Int> neighborCellList = new List<Vector2Int>();
 
     public SpriteRenderer spriteRenderer;
 

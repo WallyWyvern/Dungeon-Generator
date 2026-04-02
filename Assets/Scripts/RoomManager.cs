@@ -12,6 +12,8 @@ public class RoomManager : MonoBehaviour
     [Header("Offset Variables")]
     public float xOffset;
     public float yOffset;
+    public float xRoomSize;
+    public float yRoomSize;
 
     [Header("Prefab References")]
     public Room roomPrefab;
@@ -42,7 +44,7 @@ public class RoomManager : MonoBehaviour
         {
             var foundRoom = rooms.FirstOrDefault(x=>x.roomType == currentCell.roomType && DoesTileMatchCell(x.occupiedTiles, currentCell));
             var currentPosition = currentCell.transform.position;
-            var convertedPosition = new Vector2(currentPosition.x * xOffset, currentPosition.y * yOffset);
+            var convertedPosition = new Vector2((currentPosition.x + xOffset) * xRoomSize, (currentPosition.y + yOffset) * yRoomSize);
             var spawnedRoom = Instantiate(roomPrefab, convertedPosition, Quaternion.identity);
 
             spawnedRoom.SetupRoom(currentCell, foundRoom);
@@ -53,12 +55,12 @@ public class RoomManager : MonoBehaviour
 
     private bool DoesTileMatchCell(int[] occupiedTiles, Cell cell)
     {
-        if(occupiedTiles.Length != cell.cellList.Count) return false;
+        if(occupiedTiles.Length != cell.neighborCellList.Count) return false;
 
-        Vector2Int minKey = cell.cellList.Min();
+        Vector2Int minKey = cell.neighborCellList.Min();
         List<int> normalizedCell = new List<int>();
 
-        foreach (Vector2Int key in cell.cellList)
+        foreach (Vector2Int key in cell.neighborCellList)
         {
             int dx = (key.x) - (minKey.x);
             int dy = (key.y) - (minKey.y);

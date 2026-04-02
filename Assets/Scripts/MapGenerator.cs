@@ -24,7 +24,7 @@ public class MapGenerator : MonoBehaviour
     private List<int> endRoomsLegacy;
     private List<Vector2Int> endRooms;
 
-    public Dictionary<Vector2Int, Cell> getFloorPlan => floorPlan;
+    public Dictionary<Vector2Int, Cell> getFloorPlan => newFloorPlan;
 
     // legacy variables
     private int bossRoomIndex;
@@ -234,17 +234,20 @@ public class MapGenerator : MonoBehaviour
         Debug.Log("spawned cells count: " + spawnedCells.Count);
 
 
+
+
+        SetupSpecialRooms();
         foreach (var cell in newFloorPlan)
         {
+            if (floorPlan.ContainsKey(cell.Key)) { continue; }
             floorPlan.Add(cell.Key, cell.Value);
         }
 
         foreach (var cell in newSpawnedCells)
         {
+            if (spawnedCells.Contains(cell)) { continue; }
             spawnedCells.Add(cell);
         }
-
-        SetupSpecialRooms();
     }
 
     void SetupSpecialRoomsLegacy() 
@@ -643,7 +646,7 @@ public class MapGenerator : MonoBehaviour
         newCell.SetRoomType(RoomType.Regular);
 
         newFloorPlan[key] = newCell;
-        newCell.cellList.Add(key);
+        newCell.neighborCellList.Add(key);
 
         newSpawnedCells.Add(newCell);
     }
