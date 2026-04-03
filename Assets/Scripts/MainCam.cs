@@ -24,16 +24,16 @@ public class MainCam : MonoBehaviour
         switch ( direction )
         {
             case EdgeDirection.Up:
-                temp1 = new Vector2 ( 0, RoomManager.instance.yOffset * cellSize );
+                temp1 = new Vector2 ( 0, RoomManager.instance.yRoomSize * cellSize );
                 break;
             case EdgeDirection.Down:
-                temp1 = new Vector2( 0, -RoomManager.instance.yOffset * cellSize );
+                temp1 = new Vector2( 0, -RoomManager.instance.yRoomSize * cellSize);
                 break;
             case EdgeDirection.Left:
-                temp1 = new Vector2( -RoomManager.instance.xOffset * cellSize, 0 );
+                temp1 = new Vector2( -RoomManager.instance.xRoomSize * cellSize, 0 );
                 break;
             case EdgeDirection.Right:
-                temp1 = new Vector2( RoomManager.instance.xOffset * cellSize, 0 );
+                temp1 = new Vector2( RoomManager.instance.xRoomSize * cellSize, 0 );
                 break;
             default:
                 Debug.Log( "No edge direction was found" );
