@@ -11,8 +11,8 @@ public class EventManager : MonoBehaviour
     }
 
     public event Action<EdgeDirection> onTeleportPlayer;
-    public void TeleportPlayer(EdgeDirection dir)
+    public void TeleportPlayer( EdgeDirection dir )
     {
-        if (onTeleportPlayer != null) { onTeleportPlayer(dir); }
+        if ( onTeleportPlayer != null ) { onTeleportPlayer( dir ); }
     }
 }

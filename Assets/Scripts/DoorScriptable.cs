@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu( fileName = "Door", menuName = "Scriptable Objects/Door")]
+[CreateAssetMenu( fileName = "Door", menuName = "Scriptable Objects/Door" )]
 public class DoorScriptable : ScriptableObject
 {
     public RoomType roomType;

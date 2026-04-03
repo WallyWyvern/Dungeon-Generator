@@ -19,22 +19,22 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
-        bombAction.action.started += dropBomb;
+        bombAction.action.started += DropBomb;
         newDungeon.action.started += ResetPlayer;
         moveAction.action.Enable();
         EventManager.Instance.onTeleportPlayer += TeleportPlayer;
     }
 
-    private void ResetPlayer(InputAction.CallbackContext context)
+    private void ResetPlayer( InputAction.CallbackContext context )
     {
         transform.position = startPosition;
         Physics.SyncTransforms();
     }
 
-    private void TeleportPlayer(EdgeDirection direction)
+    private void TeleportPlayer( EdgeDirection direction )
     {
         Vector2 temp1;
-        switch (direction)
+        switch ( direction )
         {
             case EdgeDirection.Up:
                 temp1 = teleportUp;
@@ -49,31 +49,31 @@ public class Player : MonoBehaviour
                 temp1 = teleportRight;
                 break;
             default:
-                Debug.Log("No edge direction was found");
+                Debug.Log( "No edge direction was found" );
                 temp1 = Vector2.zero;
                 break;
         }
 
-        Vector3 temp2 = new Vector3(transform.position.x + temp1.x, transform.position.y + temp1.y, transform.position.z);
+        Vector3 temp2 = new Vector3( transform.position.x + temp1.x, transform.position.y + temp1.y, transform.position.z );
         transform.position = temp2;
         Physics.SyncTransforms();
     }
 
     private void OnDestroy()
     {
-        bombAction.action.started -= dropBomb;
+        bombAction.action.started -= DropBomb;
         moveAction.action.Disable();
     }
 
-    private void dropBomb(InputAction.CallbackContext context)
+    private void DropBomb( InputAction.CallbackContext context )
     {
-        Debug.Log("Dropped bomb!");
+        Debug.Log( "Dropped bomb!" );
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
         moveDirection = moveAction.action.ReadValue<Vector2>();
-        player.Move(moveDirection.normalized * playerSpeed);
+        player.Move( moveDirection.normalized * playerSpeed );
     }
 }

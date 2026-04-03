@@ -109,6 +109,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
   spriteRenderer: {fileID: 9107062007947402724}
+  doorPosUp: {x: 0, y: 1.75}
+  doorPosDown: {x: 0, y: -1.75}
+  doorPosLeft: {x: -4.25, y: 0}
+  doorPosRight: {x: 4.25, y: 0}
 --- !u!65 &3860337165759985892
 BoxCollider:
   m_ObjectHideFlags: 0

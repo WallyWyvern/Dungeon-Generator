@@ -8,72 +8,46 @@ using UnityEngine.InputSystem;
 
 public class MapGenerator : MonoBehaviour
 {
-    [Header("Generator Settings")]
+    public Dictionary<Vector2Int, Cell> newFloorPlan { get; private set; }
+    public Dictionary<Vector2Int, Cell> floorPlan { get; private set; }
+    public Dictionary<Vector2Int, Cell> getFloorPlan => newFloorPlan;
+    public List<Cell> getSpawnedCells => newSpawnedCells;
+    
+    public static MapGenerator instance;
+
+    [Header( "Generator Settings" )]
     [SerializeField] private int minRooms = 7;
     [SerializeField] private int maxRooms = 15;
     [SerializeField] private int startLocationLegacy = 45;
-    [SerializeField] private Vector2Int startLocation = new Vector2Int(0,0);
+    [SerializeField] private Vector2Int startLocation = new Vector2Int( 0, 0 );
     [SerializeField] private float endGenerationChance = 0.5f;
     [SerializeField] Cell cellPrefab;
     [SerializeField] private float cellSize = 0.5f;
 
-    private int[] floorPlanLegacy;
-    public Dictionary<Vector2Int, Cell> newFloorPlan { get; private set; }
-    public Dictionary<Vector2Int, Cell> floorPlan { get; private set; }
+    [Header( "Sprite References" )]
+    [SerializeField] private Sprite item;
+    [SerializeField] private Sprite shop;
+    [SerializeField] private Sprite boss;
+    [SerializeField] private Sprite secret;
+
+    [Header( "Debug Settings" )]
+    [SerializeField] private InputActionReference generateDungeon;
+    [SerializeField] private InputActionReference extendDungeon;
+
     private int floorPlanCount = 0;
-    private List<int> endRoomsLegacy;
     private List<Vector2Int> endRooms;
 
-    public Dictionary<Vector2Int, Cell> getFloorPlan => newFloorPlan;
-
-    // legacy variables
-    private int bossRoomIndex;
-    private int secretRoomIndex;
-    private int shopRoomIndex;
-    private int itemRoomIndex;
-
-    // new variables
     private Vector2Int bossRoomKey;
     private Vector2Int secretRoomKey;
     private Vector2Int shopRoomKey;
     private Vector2Int itemRoomKey;
     
-    private float positionOffsetX;
-    private float positionOffsetY;
-
     private Queue<int> cellQueueLegacy;
     private Queue<Vector2Int> cellQueue;
     private List<Cell> newSpawnedCells = new();
     private List<Cell> spawnedCells = new();
 
     private int stackOverflowLimiter = 0;
-
-    public List<Cell> getSpawnedCells => newSpawnedCells;
-
-    [Header("Sprite References")]
-    [SerializeField] private Sprite item;
-    [SerializeField] private Sprite shop;
-    [SerializeField] private Sprite boss;
-    [SerializeField] private Sprite secret;
-
-    [Header("Debug Settings")]
-    [SerializeField] private InputActionReference generateDungeon;
-    [SerializeField] private InputActionReference extendDungeon;
-
-
-    // infinite grid with dictionary (x,y naar int)? 
-
-    /* references for dictionary refactor
-        +1 is x + 1
-        -1 is x - 1
-        +10 is y - 1
-        -10 is y + 1
-     
-        index is a Vector2Int (dictionary key)
-        
-     */
-    public static MapGenerator instance;
-
 
     private void Awake()
     {
@@ -84,31 +58,32 @@ public class MapGenerator : MonoBehaviour
 
     private void OnEnable()
     {
-        generateDungeon.action.started += generateNewDungeon;
-        extendDungeon.action.started += startDungeonExtension;
+        generateDungeon.action.started += GenerateNewDungeon;
+        extendDungeon.action.started += StartDungeonExtension;
     }
 
     private void OnDisable()
     {
-        generateDungeon.action.started -= generateNewDungeon;
-        extendDungeon.action.started -= startDungeonExtension;
+        generateDungeon.action.started -= GenerateNewDungeon;
+        extendDungeon.action.started -= StartDungeonExtension;
     }
-    private void startDungeonExtension(InputAction.CallbackContext context)
+
+    private void StartDungeonExtension( InputAction.CallbackContext context )
     {
         SetupDungeonExtension();
     }
 
-    private void generateNewDungeon(InputAction.CallbackContext context)
+    private void GenerateNewDungeon( InputAction.CallbackContext context )
     {
-        foreach (var cell in floorPlan.Values.ToList())
+        foreach ( var cell in floorPlan.Values.ToList() )
         {
-            Destroy(cell.gameObject);
+            Destroy( cell.gameObject );
         }
         floorPlan.Clear();
 
-        foreach (var cell in spawnedCells.ToList())
+        foreach ( var cell in spawnedCells.ToList() )
         { 
-            Destroy(cell.gameObject);
+            Destroy( cell.gameObject );
         }
         spawnedCells.Clear();
         stackOverflowLimiter = default;
@@ -116,98 +91,38 @@ public class MapGenerator : MonoBehaviour
         SetupDungeon();
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         SetupDungeon();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        //if (Input.GetKeyDown(KeyCode.Space)) { SetupDungeon(); }
-    }
-
-    void SetupDungeonLegacy() 
-    {
-        for (int i = 0; i < newSpawnedCells.Count; i++)
-        {
-            Destroy(newSpawnedCells[i].gameObject);
-        }
-        newSpawnedCells.Clear();
-
-        floorPlanLegacy = new int[100];
-        floorPlanCount = default;
-        cellQueueLegacy = new Queue<int>();
-        endRoomsLegacy = new List<int>();
-
-        VisitCellLegacy(startLocationLegacy);
-
-        GenerateDungeonLegacy();
-    }
-
     void SetupDungeon()
     {
-        /*foreach (var cell in newFloorPlan.Values.ToList())
-        {
-            Destroy(cell.gameObject);
-        }*/
         newFloorPlan.Clear();
-
-        /*foreach (var cell in newSpawnedCells.ToList())
-        {
-            Destroy(cell.gameObject);
-        }*/
         newSpawnedCells.Clear();
 
-        foreach (var cell in floorPlan)
+        foreach ( var cell in floorPlan )
         {
-            newFloorPlan.Add(cell.Key, cell.Value);
+            newFloorPlan.Add( cell.Key, cell.Value );
         }
 
-        foreach (var cell in spawnedCells)
+        foreach ( var cell in spawnedCells )
         {
-            newSpawnedCells.Add(cell);
+            newSpawnedCells.Add( cell );
         }
 
         cellQueue = new Queue<Vector2Int>();
         endRooms = new List<Vector2Int>();
         floorPlanCount = default;
 
-        VisitCell(startLocation);
+        VisitCell( startLocation );
 
         GenerateDungeon();
     }
 
-    void GenerateDungeonLegacy() 
-    {
-        while (cellQueueLegacy.Count > 0)
-        { 
-            int index = cellQueueLegacy.Dequeue();
-            int x = index % 10;
-
-            bool created = false;
-
-            if (x > 1) { created |= VisitCellLegacy(index - 1); }
-            if (x < 9) { created |= VisitCellLegacy(index + 1); }
-            if (index > 20) { created |= VisitCellLegacy(index - 10); }
-            if (index < 70) { created |= VisitCellLegacy(index + 10); }
-
-            if (created == false) { endRoomsLegacy.Add(index); }
-        }
-
-        if(floorPlanCount < minRooms)
-        { 
-            SetupDungeonLegacy(); 
-            return;
-        }
-
-        SetupSpecialRoomsLegacy();
-    }
-
     void GenerateDungeon()
     {
-        while (cellQueue.Count > 0)
+        while ( cellQueue.Count > 0 )
         {
             Vector2Int key = cellQueue.Dequeue();
             int x = key.x;
@@ -215,256 +130,152 @@ public class MapGenerator : MonoBehaviour
 
             bool created = false;
 
-            created |= VisitCell(ReturnNewVector(key, EdgeDirection.Left));
-            created |= VisitCell(ReturnNewVector(key, EdgeDirection.Right));
-            created |= VisitCell(ReturnNewVector(key, EdgeDirection.Up));
-            created |= VisitCell(ReturnNewVector(key, EdgeDirection.Down));
+            created |= VisitCell( ReturnNewVector( key, EdgeDirection.Left ) );
+            created |= VisitCell( ReturnNewVector( key, EdgeDirection.Right ) );
+            created |= VisitCell( ReturnNewVector( key, EdgeDirection.Up ) );
+            created |= VisitCell( ReturnNewVector( key, EdgeDirection.Down ) );
 
-            if (created == false) { endRooms.Add(key); }
+            if ( created == false ) { endRooms.Add( key ); }
         }
 
-        if (floorPlanCount < minRooms)
+        if ( floorPlanCount < minRooms )
         {
-            Debug.Log("Rooms generated this failed attempt: " + floorPlanCount.ToString());
-            if (stackOverflowLimiter > 20) { Debug.LogError("Generation failed, too many generation attempts"); return; }
+            Debug.Log( "Rooms generated this failed attempt: " + floorPlanCount.ToString() );
+            if ( stackOverflowLimiter > 20 ) { Debug.LogError( "Generation failed, too many generation attempts" ); return; }
             stackOverflowLimiter++;
             SetupDungeon();
             return;
         }
 
-        Debug.Log("new floor plan count: " + newFloorPlan.Count);
-        Debug.Log("new spawned cells count: " + newSpawnedCells.Count);
+        Debug.Log( "new floor plan count: " + newFloorPlan.Count );
+        Debug.Log( "new spawned cells count: " + newSpawnedCells.Count );
 
-        Debug.Log("floor plan count: " + floorPlan.Count);
-        Debug.Log("spawned cells count: " + spawnedCells.Count);
+        Debug.Log( "floor plan count: " + floorPlan.Count );
+        Debug.Log( "spawned cells count: " + spawnedCells.Count );
 
-        //Debug.Log("Generation attempts: " + stackOverflowLimiter.ToString());
-
-
-
+        //Debug.Log( "Generation attempts: " + stackOverflowLimiter.ToString() );
 
         SetupSpecialRooms();
-        foreach (var cell in newFloorPlan)
+        foreach ( var cell in newFloorPlan )
         {
-            if (floorPlan.ContainsKey(cell.Key)) { continue; }
-            floorPlan.Add(cell.Key, cell.Value);
+            if ( floorPlan.ContainsKey( cell.Key ) ) { continue; }
+            floorPlan.Add( cell.Key, cell.Value );
         }
 
-        foreach (var cell in newSpawnedCells)
+        foreach ( var cell in newSpawnedCells )
         {
-            if (spawnedCells.Contains(cell)) { continue; }
-            spawnedCells.Add(cell);
+            if ( spawnedCells.Contains(cell) ) { continue; }
+            spawnedCells.Add( cell );
         }
-    }
-
-    void SetupSpecialRoomsLegacy() 
-    {
-        bossRoomIndex = endRoomsLegacy.Count > 0 ? endRoomsLegacy[endRoomsLegacy.Count - 1] : -1;
-
-        if (bossRoomIndex != -1)
-        { 
-            endRoomsLegacy.RemoveAt(endRoomsLegacy.Count - 1);
-        }
-
-        itemRoomIndex = RandomEndRoomLegacy();
-        shopRoomIndex = RandomEndRoomLegacy();
-        secretRoomIndex = PickSecretRoomLegacy();
-
-        if (itemRoomIndex == -1 || shopRoomIndex == -1 || bossRoomIndex == -1 || secretRoomIndex == -1)
-        {
-            SetupDungeonLegacy();
-            return;
-        }
-
-        SpawnRoomLegacy(secretRoomIndex);
-
-        UpdateSpecialRoomVisualsLegacy();
-        RoomManager.instance.SetupRooms(newSpawnedCells);
     }
 
     void SetupSpecialRooms()
     {
         bossRoomKey = endRooms.Count > 0 ? endRooms[endRooms.Count - 1] : startLocation;
 
-        if (bossRoomKey != startLocation)
+        if ( bossRoomKey != startLocation )
         {
-            endRooms.RemoveAt(endRooms.Count - 1);
+            endRooms.RemoveAt( endRooms.Count - 1 );
         }
 
         itemRoomKey = RandomEndRoom();
         shopRoomKey = RandomEndRoom();
         secretRoomKey = PickSecretRoom();
 
-        if (itemRoomKey == Vector2Int.zero || shopRoomKey == Vector2Int.zero || bossRoomKey == Vector2Int.zero || secretRoomKey == Vector2Int.zero)
+        if ( itemRoomKey == Vector2Int.zero || shopRoomKey == Vector2Int.zero || bossRoomKey == Vector2Int.zero || secretRoomKey == Vector2Int.zero )
         {
             SetupDungeon();
             return;
         }
 
-        SpawnRoom(secretRoomKey);
+        SpawnRoom( secretRoomKey );
 
         UpdateSpecialRoomVisuals();
-        RoomManager.instance.SetupRooms(newSpawnedCells);
-    }
-
-    void UpdateSpecialRoomVisualsLegacy() 
-    {
-        foreach (var cell in newSpawnedCells)
-        { 
-            if(cell.index == itemRoomIndex)
-            {
-                cell.SetSpecialRoomSprite(item);
-                cell.SetRoomType(RoomType.Item);
-            }
-
-            if (cell.index == shopRoomIndex)
-            {
-                cell.SetSpecialRoomSprite(shop);
-                cell.SetRoomType(RoomType.Shop);
-            }
-
-            if (cell.index == bossRoomIndex)
-            {
-                cell.SetSpecialRoomSprite(boss);
-                cell.SetRoomType(RoomType.Boss);
-            }
-
-            if (cell.index == secretRoomIndex)
-            {
-                cell.SetSpecialRoomSprite(secret);
-                cell.SetRoomType(RoomType.Secret);
-            }
-        }
+        RoomManager.instance.SetupRooms( newSpawnedCells );
     }
 
     void UpdateSpecialRoomVisuals()
     {
-        foreach (var cell in newSpawnedCells)
+        foreach ( var cell in newSpawnedCells )
         {
-            if (cell.key == itemRoomKey)
+            if ( cell.key == itemRoomKey )
             {
-                cell.SetSpecialRoomSprite(item);
-                cell.SetRoomType(RoomType.Item);
+                cell.SetSpecialRoomSprite( item );
+                cell.SetRoomType( RoomType.Item );
             }
 
-            if (cell.key == shopRoomKey)
+            if ( cell.key == shopRoomKey )
             {
-                cell.SetSpecialRoomSprite(shop);
-                cell.SetRoomType(RoomType.Shop);
+                cell.SetSpecialRoomSprite( shop );
+                cell.SetRoomType( RoomType.Shop );
             }
 
-            if (cell.key == bossRoomKey)
+            if ( cell.key == bossRoomKey )
             {
-                cell.SetSpecialRoomSprite(boss);
-                cell.SetRoomType(RoomType.Boss);
+                cell.SetSpecialRoomSprite( boss );
+                cell.SetRoomType( RoomType.Boss );
             }
 
-            if (cell.key == secretRoomKey)
+            if ( cell.key == secretRoomKey )
             {
-                cell.SetSpecialRoomSprite(secret);
-                cell.SetRoomType(RoomType.Secret);
+                cell.SetSpecialRoomSprite( secret );
+                cell.SetRoomType( RoomType.Secret );
             }
         }
-    }
-
-    int RandomEndRoomLegacy() 
-    {
-        if (endRoomsLegacy.Count == 0) return -1;
-
-        int randomRoom = Random.Range(0, endRoomsLegacy.Count);
-        int index = endRoomsLegacy[randomRoom];
-
-        endRoomsLegacy.RemoveAt(randomRoom);
-        return index;
     }
 
     Vector2Int RandomEndRoom()
     {
-        if (endRooms.Count == 0) return Vector2Int.zero;
+        if ( endRooms.Count == 0 ) return Vector2Int.zero;
 
-        int randomRoom = Random.Range(0, endRooms.Count);
-        Vector2Int key = endRooms[randomRoom];
+        int randomRoom = Random.Range( 0, endRooms.Count );
+        Vector2Int key = endRooms[ randomRoom ];
 
-        endRooms.RemoveAt(randomRoom);
+        endRooms.RemoveAt( randomRoom );
         return key;
-    }
-
-    int PickSecretRoomLegacy() 
-    {
-        for (int attempt = 0; attempt < 900; attempt++)
-        { 
-            int x = Mathf.FloorToInt(Random.Range(0f, 1f) * 9) + 1;
-            int y = Mathf.FloorToInt(Random.Range(0f, 1f) * 8) + 2;
-
-            int index = y * 10 + x;
-
-            if (floorPlanLegacy[index] != 0)
-            {
-                continue;
-            }
-
-            if (bossRoomIndex == index - 1 || bossRoomIndex == index + 1 || bossRoomIndex == index - 10 || bossRoomIndex == index + 10)
-            {
-                continue;
-            }
-
-            if (index - 1 < 0 || index + 1 > floorPlanLegacy.Length || index - 10 < 0 || index + 10 > floorPlanLegacy.Length)
-            {
-                continue;
-            }
-
-            int neighbours = GetNeighbourCountLegacy(index);
-
-            if (neighbours >= 3 || (attempt > 300 && neighbours >= 2) || (attempt > 600 && neighbours >= 1))
-            {
-                return index;
-            }
-        }
-
-        return -1;
     }
 
     Vector2Int PickSecretRoom()
     {
         // check for 3 neighbors
-        foreach (var cell in newFloorPlan)
+        foreach ( var cell in newFloorPlan )
         {
             Vector2Int key = cell.Key;
-            Vector2Int newKey = ReturnNewVector(key, EdgeDirection.Up);
-            if (!newFloorPlan.ContainsKey(newKey)) 
+            Vector2Int newKey = ReturnNewVector( key, EdgeDirection.Up );
+            if ( !newFloorPlan.ContainsKey( newKey ) ) 
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 3)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 3 )
                 {
                     return newKey;
                 }
             }
 
-            newKey = ReturnNewVector(key, EdgeDirection.Down);
-            if (!newFloorPlan.ContainsKey(newKey))
+            newKey = ReturnNewVector( key, EdgeDirection.Down );
+            if ( !newFloorPlan.ContainsKey( newKey ) )
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 3)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 3 )
                 {
                     return newKey;
                 }
             }
 
-            newKey = ReturnNewVector(key, EdgeDirection.Left);
-            if (!newFloorPlan.ContainsKey(newKey))
+            newKey = ReturnNewVector( key, EdgeDirection.Left );
+            if ( !newFloorPlan.ContainsKey( newKey ) )
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 3)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 3 )
                 {
                     return newKey;
                 }
             }
 
-            newKey = ReturnNewVector(key, EdgeDirection.Right);
-            if (!newFloorPlan.ContainsKey(newKey))
+            newKey = ReturnNewVector( key, EdgeDirection.Right );
+            if ( !newFloorPlan.ContainsKey( newKey ) )
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 3)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 3 )
                 {
                     return newKey;
                 }
@@ -472,44 +283,44 @@ public class MapGenerator : MonoBehaviour
         }
 
         // check for 2 neighbors
-        foreach (var cell in newFloorPlan)
+        foreach ( var cell in newFloorPlan )
         {
             Vector2Int key = cell.Key;
-            Vector2Int newKey = ReturnNewVector(key, EdgeDirection.Up);
-            if (!newFloorPlan.ContainsKey(newKey))
+            Vector2Int newKey = ReturnNewVector( key, EdgeDirection.Up );
+            if ( !newFloorPlan.ContainsKey( newKey ) )
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 2)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 2 )
                 {
                     return newKey;
                 }
             }
 
-            newKey = ReturnNewVector(key, EdgeDirection.Down);
-            if (!newFloorPlan.ContainsKey(newKey))
+            newKey = ReturnNewVector( key, EdgeDirection.Down );
+            if ( !newFloorPlan.ContainsKey( newKey ) )
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 2)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 2 )
                 {
                     return newKey;
                 }
             }
 
-            newKey = ReturnNewVector(key, EdgeDirection.Left);
-            if (!newFloorPlan.ContainsKey(newKey))
+            newKey = ReturnNewVector( key, EdgeDirection.Left );
+            if ( !newFloorPlan.ContainsKey( newKey ) )
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 2)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 2 )
                 {
                     return newKey;
                 }
             }
 
-            newKey = ReturnNewVector(key, EdgeDirection.Right);
-            if (!newFloorPlan.ContainsKey(newKey))
+            newKey = ReturnNewVector( key, EdgeDirection.Right );
+            if ( !newFloorPlan.ContainsKey( newKey ) )
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 2)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 2 )
                 {
                     return newKey;
                 }
@@ -517,44 +328,44 @@ public class MapGenerator : MonoBehaviour
         }
         
         // check for 1 neighbor
-        foreach (var cell in newFloorPlan)
+        foreach ( var cell in newFloorPlan )
         {
             Vector2Int key = cell.Key;
-            Vector2Int newKey = ReturnNewVector(key, EdgeDirection.Up);
-            if (!newFloorPlan.ContainsKey(newKey))
+            Vector2Int newKey = ReturnNewVector( key, EdgeDirection.Up );
+            if ( !newFloorPlan.ContainsKey( newKey ) )
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 1)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 1 )
                 {
                     return newKey;
                 }
             }
 
-            newKey = ReturnNewVector(key, EdgeDirection.Down);
-            if (!newFloorPlan.ContainsKey(newKey))
+            newKey = ReturnNewVector( key, EdgeDirection.Down );
+            if ( !newFloorPlan.ContainsKey( newKey ) )
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 1)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 1 )
                 {
                     return newKey;
                 }
             }
 
-            newKey = ReturnNewVector(key, EdgeDirection.Left);
-            if (!newFloorPlan.ContainsKey(newKey))
+            newKey = ReturnNewVector( key, EdgeDirection.Left );
+            if ( !newFloorPlan.ContainsKey( newKey ) )
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 1)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 1 )
                 {
                     return newKey;
                 }
             }
 
-            newKey = ReturnNewVector(key, EdgeDirection.Right);
-            if (!newFloorPlan.ContainsKey(newKey))
+            newKey = ReturnNewVector( key, EdgeDirection.Right );
+            if ( !newFloorPlan.ContainsKey( newKey ) )
             {
-                int NBC = GetNeighbourCount(newKey);
-                if (NBC >= 1)
+                int NBC = GetNeighbourCount( newKey );
+                if ( NBC >= 1 )
                 {
                     return newKey;
                 }
@@ -564,27 +375,22 @@ public class MapGenerator : MonoBehaviour
         return Vector2Int.zero;
     }
 
-    private int GetNeighbourCountLegacy(int index) 
-    {
-        return floorPlanLegacy[index - 10] + floorPlanLegacy[index + 10] + floorPlanLegacy[index - 1] + floorPlanLegacy[index + 1];
-    }
-
-    private int GetNeighbourCount(Vector2Int key)
+    private int GetNeighbourCount( Vector2Int key )
     {
         int temp = 0;
-        if (newFloorPlan.ContainsKey(ReturnNewVector(key, EdgeDirection.Up)))
+        if ( newFloorPlan.ContainsKey( ReturnNewVector( key, EdgeDirection.Up ) ) )
         {
             temp++;
         }
-        if (newFloorPlan.ContainsKey(ReturnNewVector(key, EdgeDirection.Down)))
+        if ( newFloorPlan.ContainsKey( ReturnNewVector( key, EdgeDirection.Down ) ) )
         {
             temp++;
         }
-        if (newFloorPlan.ContainsKey(ReturnNewVector(key, EdgeDirection.Left)))
+        if ( newFloorPlan.ContainsKey( ReturnNewVector( key, EdgeDirection.Left ) ) )
         {
             temp++;
         }
-        if (newFloorPlan.ContainsKey(ReturnNewVector(key, EdgeDirection.Right)))
+        if ( newFloorPlan.ContainsKey( ReturnNewVector( key, EdgeDirection.Right ) ) )
         {
             temp++;
         }
@@ -592,120 +398,46 @@ public class MapGenerator : MonoBehaviour
         return temp;
     }
 
-    private bool VisitCellLegacy(int index) 
+    private bool VisitCell( Vector2Int key )
     {
         // Check if a cell is allowed to be spawned
-        if (floorPlanLegacy[index] != 0) { return false; }
-        if (GetNeighbourCountLegacy(index) > 1) { return false; }
-        if (floorPlanCount > maxRooms) { return false; }
-        if (Random.value < endGenerationChance) { return false; }
-
-        cellQueueLegacy.Enqueue(index);
-        floorPlanLegacy[index] = 1;
-        floorPlanCount++;
-
-        SpawnRoomLegacy(index);
-
-        return true;
-    }
-
-    private bool VisitCell(Vector2Int key)
-    {
-        // Check if a cell is allowed to be spawned
-        if (newFloorPlan.ContainsKey(key)) { return false; }
-        if (key != startLocation)
+        if ( newFloorPlan.ContainsKey( key ) ) { return false; }
+        if ( key != startLocation )
         {
-            if (GetNeighbourCount(key) > 1) { return false; }
+            if ( GetNeighbourCount( key ) > 1 ) { return false; }
         }
-        if (floorPlanCount >= maxRooms) { return false; }
-        if (Random.value < endGenerationChance) { return false; }
+        if ( floorPlanCount >= maxRooms ) { return false; }
+        if ( Random.value < endGenerationChance ) { return false; }
 
-        newFloorPlan.Add(key, null);
-        cellQueue.Enqueue(key);
+        newFloorPlan.Add( key, null );
+        cellQueue.Enqueue( key );
         floorPlanCount++;
 
-        SpawnRoom(key);
+        SpawnRoom( key );
 
         return true;
     }
 
-    private void SpawnRoomLegacy(int index) 
-    {
-        int x = index % 10;
-        int y = index / 10;
-        Vector2 position = new Vector2((x * cellSize) + positionOffsetX, (-y * cellSize) + positionOffsetY);
-
-        Cell newCell = Instantiate(cellPrefab, position, Quaternion.identity);
-        newCell.value = 1;
-        newCell.index = index;
-        newCell.SetRoomType(RoomType.Regular);
-
-        newCell.cellListLegacy.Add(index);
-
-        newSpawnedCells.Add(newCell);
-    }
-
-    private void SpawnRoom(Vector2Int key)
+    private void SpawnRoom( Vector2Int key )
     {
         int x = key.x;
         int y = key.y;
-        Vector2 position = new Vector2((x * cellSize) + positionOffsetX, (-y * cellSize) + positionOffsetY);
+        Vector2 position = new Vector2( ( x * cellSize ), ( -y * cellSize ) );
 
-        Cell newCell = Instantiate(cellPrefab, position, Quaternion.identity);
+        Cell newCell = Instantiate( cellPrefab, position, Quaternion.identity );
         newCell.value = 1;
         newCell.key = key;
-        newCell.SetRoomType(RoomType.Regular);
+        newCell.SetRoomType( RoomType.Regular );
 
-        newFloorPlan[key] = newCell;
-        newCell.neighborCellList.Add(key);
+        newFloorPlan[ key ] = newCell;
+        newCell.neighborCellList.Add( key );
 
-        newSpawnedCells.Add(newCell);
-    }
-
-    void SetupDungeonExtensionLegacy()
-    {
-        floorPlanLegacy = new int[100];
-        floorPlanCount = default;
-        cellQueueLegacy = new Queue<int>();
-        endRoomsLegacy = new List<int>();
-
-        // get bossroom position
-        Vector2 bossRoomPosition = GetBossRoomPositionLegacy(bossRoomIndex);
-        Debug.Log(bossRoomPosition.ToString());
-        // check boss room neighbour and calculate offsets
-        if (floorPlanLegacy[bossRoomIndex + 1] == 1)
-        {
-            positionOffsetX += (9 - ((bossRoomIndex + 10) % 10)) * cellSize;
-            positionOffsetY += (5 - ((bossRoomIndex + 10) / 10)) * cellSize;
-            startLocationLegacy = 59;
-        }
-        if (floorPlanLegacy[bossRoomIndex - 1] == 1)
-        {
-            positionOffsetX += (((bossRoomIndex + 10) % 10)) * cellSize;
-            positionOffsetY += (((bossRoomIndex + 10) / 10) - 5) * cellSize;
-            startLocationLegacy = 50;
-        }
-        if (floorPlanLegacy[bossRoomIndex + 10] == 1)
-        {
-            positionOffsetX += (((bossRoomIndex - 10) % 10) - 5) * cellSize;
-            positionOffsetY += (((bossRoomIndex - 10) / 10) - 9) * cellSize;
-            startLocationLegacy = 95;
-        }
-        if (floorPlanLegacy[bossRoomIndex - 10] == 1)
-        {
-            positionOffsetX += (5 - ((bossRoomIndex + 10) % 10)) * cellSize;
-            positionOffsetY += (((bossRoomIndex + 10) / 10)) * cellSize;
-            startLocationLegacy = 5;
-        }
-
-        VisitCellLegacy(startLocationLegacy);
-
-        GenerateDungeonLegacy();
+        newSpawnedCells.Add( newCell );
     }
 
     void SetupDungeonExtension()
     {
-        startLocation = GetExtensionStartLocation(bossRoomKey);
+        startLocation = GetExtensionStartLocation( bossRoomKey );
         bossRoomKey = default;
         shopRoomKey = default;
         itemRoomKey = default;
@@ -714,66 +446,54 @@ public class MapGenerator : MonoBehaviour
         SetupDungeon();
     }
 
-    Vector2 GetBossRoomPositionLegacy(int index)
-    { 
-        foreach(var cell in newSpawnedCells)
-        {
-            if (cell.index == index)
-            {
-                return cell.transform.position;
-            }
-        }
-        return Vector2.zero;
-    }
-
     Vector2Int GetExtensionStartLocation(Vector2Int bossKey)
     {
         Vector2Int tempKey;
 
-        tempKey = ReturnNewVector(bossKey, EdgeDirection.Up);
-        if (floorPlan.ContainsKey(tempKey)) 
+        tempKey = ReturnNewVector( bossKey, EdgeDirection.Up );
+        if ( floorPlan.ContainsKey( tempKey ) ) 
         {
-            Debug.Log("Found neighbor above bossroom");
-            return ReturnNewVector(bossKey, EdgeDirection.Down); 
+            Debug.Log( "Found neighbor above bossroom" );
+            return ReturnNewVector( bossKey, EdgeDirection.Down ); 
         }
 
-        tempKey = ReturnNewVector(bossKey, EdgeDirection.Down);
-        if (floorPlan.ContainsKey(tempKey)) 
+        tempKey = ReturnNewVector( bossKey, EdgeDirection.Down );
+        if ( floorPlan.ContainsKey( tempKey ) ) 
         {
-            Debug.Log("Found neighbor Below bossroom");
-            return ReturnNewVector(bossKey, EdgeDirection.Up); 
+            Debug.Log( "Found neighbor Below bossroom" );
+            return ReturnNewVector( bossKey, EdgeDirection.Up ); 
         }
 
-        tempKey = ReturnNewVector(bossKey, EdgeDirection.Left);
-        if (floorPlan.ContainsKey(tempKey)) 
+        tempKey = ReturnNewVector( bossKey, EdgeDirection.Left );
+        if ( floorPlan.ContainsKey( tempKey ) ) 
         {
-            Debug.Log("Found neighbor left of bossroom");
-            return ReturnNewVector(bossKey, EdgeDirection.Right); 
+            Debug.Log( "Found neighbor left of bossroom" );
+            return ReturnNewVector( bossKey, EdgeDirection.Right ); 
         }
 
-        tempKey = ReturnNewVector(bossKey, EdgeDirection.Right);
-        if (floorPlan.ContainsKey(tempKey)) 
+        tempKey = ReturnNewVector( bossKey, EdgeDirection.Right );
+        if ( floorPlan.ContainsKey( tempKey ) ) 
         {
-            Debug.Log("Found neighbor right of bossroom");
-            return ReturnNewVector(bossKey, EdgeDirection.Left); 
+            Debug.Log( "Found neighbor right of bossroom" );
+            return ReturnNewVector( bossKey, EdgeDirection.Left ); 
         }
 
-        Debug.LogWarning("Could not find a bossroom neighbor!");
+        Debug.LogWarning( "Could not find a bossroom neighbor!" );
         return Vector2Int.zero ;
     }
 
-    private Vector2Int ReturnNewVector(Vector2Int key, EdgeDirection dir)
+    private Vector2Int ReturnNewVector( Vector2Int key, EdgeDirection dir )
     {
-        switch (dir)
+        switch ( dir )
         {
             case EdgeDirection.Up:
-                return new Vector2Int(key.x, key.y + 1);
+                return new Vector2Int( key.x, key.y + 1 );
             case EdgeDirection.Down:
-                return new Vector2Int(key.x, key.y - 1);
+                return new Vector2Int( key.x, key.y - 1 );
             case EdgeDirection.Left:
-                return new Vector2Int(key.x - 1, key.y);
+                return new Vector2Int( key.x - 1, key.y );
             case EdgeDirection.Right:
-                return new Vector2Int(key.x + 1, key.y);
+                return new Vector2Int( key.x + 1, key.y );
             default:
                 return Vector2Int.zero;
         }

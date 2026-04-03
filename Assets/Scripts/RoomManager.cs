@@ -9,13 +9,13 @@ public class RoomManager : MonoBehaviour
 {
     private List<Room> createdRooms;
 
-    [Header("Offset Variables")]
+    [Header( "Offset Variables" )]
     public float xOffset;
     public float yOffset;
     public float xRoomSize;
     public float yRoomSize;
 
-    [Header("Prefab References")]
+    [Header( "Prefab References" )]
     public Room roomPrefab;
     public Door doorPrefab;
 
@@ -31,47 +31,47 @@ public class RoomManager : MonoBehaviour
         createdRooms = new List<Room>();
     }
 
-    public void SetupRooms(List<Cell> spawnedCells)
+    public void SetupRooms( List<Cell> spawnedCells )
     {
-        for(int i = createdRooms.Count - 1; i >= 0; i--)
+        for( int i = createdRooms.Count - 1; i >= 0; i-- )
         {
-            Destroy(createdRooms[i].gameObject);
+            Destroy( createdRooms[ i ].gameObject );
         }
 
         createdRooms.Clear();
 
-        foreach(var currentCell in spawnedCells)
+        foreach( var currentCell in spawnedCells )
         {
-            var foundRoom = rooms.FirstOrDefault(x=>x.roomType == currentCell.roomType && DoesTileMatchCell(x.occupiedTiles, currentCell));
+            var foundRoom = rooms.FirstOrDefault( x=>x.roomType == currentCell.roomType && DoesTileMatchCell( x.occupiedTiles, currentCell ) );
             var currentPosition = currentCell.transform.position;
-            var convertedPosition = new Vector2((currentPosition.x + xOffset) * xRoomSize, (currentPosition.y + yOffset) * yRoomSize);
-            var spawnedRoom = Instantiate(roomPrefab, convertedPosition, Quaternion.identity);
+            var convertedPosition = new Vector2( ( currentPosition.x + xOffset ) * xRoomSize, ( currentPosition.y + yOffset ) * yRoomSize );
+            var spawnedRoom = Instantiate( roomPrefab, convertedPosition, Quaternion.identity );
 
-            spawnedRoom.SetupRoom(currentCell, foundRoom);
+            spawnedRoom.SetupRoom( currentCell, foundRoom );
 
-            createdRooms.Add(spawnedRoom);
+            createdRooms.Add( spawnedRoom );
         }
     }
 
-    private bool DoesTileMatchCell(int[] occupiedTiles, Cell cell)
+    private bool DoesTileMatchCell( int[] occupiedTiles, Cell cell )
     {
-        if(occupiedTiles.Length != cell.neighborCellList.Count) return false;
+        if( occupiedTiles.Length != cell.neighborCellList.Count ) return false;
 
         Vector2Int minKey = cell.neighborCellList.Min();
         List<int> normalizedCell = new List<int>();
 
-        foreach (Vector2Int key in cell.neighborCellList)
+        foreach ( Vector2Int key in cell.neighborCellList )
         {
-            int dx = (key.x) - (minKey.x);
-            int dy = (key.y) - (minKey.y);
+            int dx = ( key.x ) - ( minKey.x );
+            int dy = ( key.y ) - ( minKey.y );
 
-            normalizedCell.Add(dy * 10 + dx);
+            normalizedCell.Add( dy * 10 + dx );
         }
 
         normalizedCell.Sort();
-        int[] sortedOccupied = (int[])occupiedTiles.Clone();
-        Array.Sort(sortedOccupied);
+        int[] sortedOccupied = ( int[] )occupiedTiles.Clone();
+        Array.Sort( sortedOccupied );
 
-        return normalizedCell.SequenceEqual(sortedOccupied);
+        return normalizedCell.SequenceEqual( sortedOccupied );
     }
 }
