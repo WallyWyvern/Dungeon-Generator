@@ -68,6 +68,11 @@ public class MapGenerator : MonoBehaviour
         extendDungeon.action.started -= StartDungeonExtension;
     }
 
+    private void Start()
+    {
+        SetupDungeon();
+    }
+
     private void StartDungeonExtension( InputAction.CallbackContext context )
     {
         SetupDungeonExtension();
@@ -91,12 +96,7 @@ public class MapGenerator : MonoBehaviour
         SetupDungeon();
     }
 
-    void Start()
-    {
-        SetupDungeon();
-    }
-
-    void SetupDungeon()
+    private void SetupDungeon()
     {
         newFloorPlan.Clear();
         newSpawnedCells.Clear();
@@ -120,7 +120,7 @@ public class MapGenerator : MonoBehaviour
         GenerateDungeon();
     }
 
-    void GenerateDungeon()
+    private void GenerateDungeon()
     {
         while ( cellQueue.Count > 0 )
         {
@@ -169,7 +169,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    void SetupSpecialRooms()
+    private void SetupSpecialRooms()
     {
         bossRoomKey = endRooms.Count > 0 ? endRooms[endRooms.Count - 1] : startLocation;
 
@@ -194,7 +194,7 @@ public class MapGenerator : MonoBehaviour
         RoomManager.instance.SetupRooms( newSpawnedCells );
     }
 
-    void UpdateSpecialRoomVisuals()
+    private void UpdateSpecialRoomVisuals()
     {
         foreach ( var cell in newSpawnedCells )
         {
@@ -224,7 +224,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    Vector2Int RandomEndRoom()
+    private Vector2Int RandomEndRoom()
     {
         if ( endRooms.Count == 0 ) return Vector2Int.zero;
 
@@ -235,7 +235,7 @@ public class MapGenerator : MonoBehaviour
         return key;
     }
 
-    Vector2Int PickSecretRoom()
+    private Vector2Int PickSecretRoom()
     {
         // check for 3 neighbors
         foreach ( var cell in newFloorPlan )
@@ -435,7 +435,7 @@ public class MapGenerator : MonoBehaviour
         newSpawnedCells.Add( newCell );
     }
 
-    void SetupDungeonExtension()
+    private void SetupDungeonExtension()
     {
         startLocation = GetExtensionStartLocation( bossRoomKey );
         bossRoomKey = default;
@@ -446,7 +446,7 @@ public class MapGenerator : MonoBehaviour
         SetupDungeon();
     }
 
-    Vector2Int GetExtensionStartLocation(Vector2Int bossKey)
+    private Vector2Int GetExtensionStartLocation(Vector2Int bossKey)
     {
         Vector2Int tempKey;
 
